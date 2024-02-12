@@ -860,20 +860,20 @@ pub unsafe extern "C" fn posix_memalign( memptr: *mut *mut c_void, alignment: si
 
 #[cfg_attr(not(test), no_mangle)]
 pub unsafe extern "C" fn mmap( addr: *mut c_void, length: size_t, prot: c_int, flags: c_int, fildes: c_int, off: off_t ) -> *mut c_void {
-    mmap_internal( addr, length, prot, flags, fildes, off as libc::off64_t, MapKind::Mmap )
+    mmap_internal( addr, length, prot, flags, fildes, off as libc::off_t, MapKind::Mmap )
 }
 
 #[cfg_attr(not(test), no_mangle)]
-pub unsafe extern "C" fn mmap64( addr: *mut c_void, length: size_t, prot: c_int, flags: c_int, fildes: c_int, off: libc::off64_t ) -> *mut c_void {
+pub unsafe extern "C" fn mmap64( addr: *mut c_void, length: size_t, prot: c_int, flags: c_int, fildes: c_int, off: libc::off_t ) -> *mut c_void {
     mmap_internal( addr, length, prot, flags, fildes, off, MapKind::Mmap )
 }
 
 pub unsafe extern "C" fn __mmap( addr: *mut c_void, length: size_t, prot: c_int, flags: c_int, fildes: c_int, off: off_t ) -> *mut c_void {
-    mmap_internal( addr, length, prot, flags, fildes, off as libc::off64_t, MapKind::Glibc )
+    mmap_internal( addr, length, prot, flags, fildes, off as libc::off_t, MapKind::Glibc )
 }
 
 #[inline(always)]
-unsafe fn call_mmap( addr: *mut c_void, length: size_t, prot: c_int, flags: c_int, fildes: c_int, off: libc::off64_t ) -> *mut c_void {
+unsafe fn call_mmap( addr: *mut c_void, length: size_t, prot: c_int, flags: c_int, fildes: c_int, off: libc::off_t ) -> *mut c_void {
     let mut ptr = libc::MAP_FAILED;
     if !crate::global::is_pr_set_vma_anon_name_supported() && flags & (libc::MAP_FIXED | libc::MAP_FIXED_NOREPLACE) == 0 {
         let p0 = syscall::mmap( std::ptr::null_mut(), length + 8192, 0, libc::MAP_PRIVATE, crate::global::dummy_memfd(), 0 );
@@ -892,7 +892,7 @@ unsafe fn call_mmap( addr: *mut c_void, length: size_t, prot: c_int, flags: c_in
 }
 
 #[inline(always)]
-unsafe fn mmap_internal( addr: *mut c_void, length: size_t, prot: c_int, flags: c_int, fildes: c_int, off: libc::off64_t, kind: MapKind ) -> *mut c_void {
+unsafe fn mmap_internal( addr: *mut c_void, length: size_t, prot: c_int, flags: c_int, fildes: c_int, off: libc::off_t, kind: MapKind ) -> *mut c_void {
     if !opt::is_initialized() || !opt::get().gather_maps {
         return syscall::mmap( addr, length, prot, flags, fildes, off );
     }
